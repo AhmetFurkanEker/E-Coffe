@@ -1,11 +1,22 @@
-## E-Coffe Veritabanı Projesi
+## ECoffe Database
 
-Bu proje, E-ticaret veritabanı oluşturmayı amaçlamaktadır. Veritabanı, kullanıcılar, ürünler, siparişler, adresler ve ödemelerle ilgili tabloları içermektedir. Ayrıca, saklı procedure'lar, tablo değeri işlevleri ve kısıtlamalar gibi veritabanı nesneleri de kullanılarak daha karmaşık ve işlevsel bir yapı oluşturulmuştur.
+Bu proje, ECoffe adında bir e-ticaret veritabanını oluşturmak için T-SQL sorgularını içermektedir. Veritabanı, kullanıcılar, ürünler, siparişler, adresler ve ödemeler gibi temel bileşenleri içermektedir. Ayrıca subquery, index, cursor, stored procedure, table-valued function ve constraintler gibi T-SQL öğelerini kullanarak daha gelişmiş sorgular ve veritabanı yönetimi işlemleri de gösterilmektedir.
 
-### Özellikler
+### Veritabanı Yapısı
 
-- Kullanıcılar, ürünler, siparişler, adresler ve ödemelerle ilgili tablolar.
-- Karmaşık sorgular ve birleştirmeler kullanılarak veritabanı verilerinin çeşitli analizleri.
-- Saklı procedure'lar ve tablo değeri işlevleri kullanılarak daha gelişmiş veritabanı işlemleri.
-- Kısıtlamalarla veri bütünlüğünün sağlanması.
+- Users: Kullanıcıların bilgilerini tutan tablo.
+- Products: Ürünlerin bilgilerini tutan tablo.
+- Orders: Siparişlerin bilgilerini tutan tablo.
+- Addresses: Adreslerin bilgilerini tutan tablo.
+- Payments: Ödemelerin bilgilerini tutan tablo.
+
+### Örnek T-SQL Sorguları
+
+- Subquery: Kullanıcıları ve belirli bir tutarı aşan siparişlerini getiren bir örnek sorgu.
+- Index: Ürünler tablosunda UnitsInStock sütunu için bir index oluşturan bir örnek sorgu.
+- Cursor: Users tablosundaki kullanıcıları döngüyle gezerek bilgilerini yazdıran bir örnek sorgu.
+- Stored Procedure: Kullanıcıya göre siparişleri getiren bir saklı procedure örneği.
+- Table-Valued Function: Belirli bir fiyat aralığındaki ürünleri getiren bir tablo değeri işlevi örneği.
+- Constraintler: Kısıtlamaların (CHECK, DEFAULT, FOREIGN KEY) örneklerini içeren sorgular.
+
 
