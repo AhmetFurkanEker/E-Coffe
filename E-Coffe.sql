@@ -11,7 +11,8 @@ CREATE TABLE Users (
     UserID INT PRIMARY KEY,
     UserName NVARCHAR(50),
     Email NVARCHAR(100),
-    RegistrationDate DATE
+    RegistrationDate DATE,
+    CONSTRAINT CK_Users_Email CHECK (Email LIKE '%@%')
 );
 GO
 
@@ -41,7 +42,7 @@ CREATE TABLE Addresses (
     AddressID INT PRIMARY KEY,
     UserID INT,
     AddressLine1 NVARCHAR(100),
-    AddressLine2 NVARCHAR(100),
+    AddressLine2 NVARCHAR(100) DEFAULT '',
     City NVARCHAR(50),
     PostalCode NVARCHAR(20),
     CONSTRAINT FK_Addresses_Users FOREIGN KEY (UserID)
@@ -57,8 +58,13 @@ CREATE TABLE Payments (
     Amount DECIMAL(10,2),
     PaymentStatus NVARCHAR(50),
     CONSTRAINT FK_Payments_Orders FOREIGN KEY (OrderID)
-    REFERENCES Orders(OrderID)
+    REFERENCES Orders(OrderID),
+    CONSTRAINT CK_Payments_Amount CHECK (Amount > 0)
 );
+GO
+
+-- Ürünler tablosu için index oluştur
+CREATE INDEX IX_Products_UnitsInStock ON Products (UnitsInStock);
 GO
 
 -- Örnek verileri ekle
@@ -85,29 +91,36 @@ VALUES (1, 1, '2023-03-02', 50.99, 'Completed'),
        (2, 2, '2023-03-03', 35.99, 'Completed');
 GO
 
--- Sipariş ve kullanıcı bilgilerini birleştiren karmaşık bir sorgu
-SELECT o.OrderID, o.OrderDate, o.TotalAmount, u.UserName, a.AddressLine1, a.City
-FROM Orders o
-INNER JOIN Users u ON o.UserID = u.UserID
-INNER JOIN Addresses a ON o.UserID = a.UserID;
+-- Subquery örneği
+SELECT UserID, UserName
+FROM Users
+WHERE UserID IN (SELECT UserID FROM Orders WHERE TotalAmount > 40.00);
 GO
 
--- Ürünleri stok durumuna göre sıralayan karmaşık bir sorgu
-SELECT ProductName, UnitPrice, UnitsInStock,
-    CASE
-        WHEN UnitsInStock > 50 THEN 'In Stock'
-        WHEN UnitsInStock > 0 THEN 'Limited Stock'
-        ELSE 'Out of Stock'
-    END AS StockStatus
-FROM Products
-ORDER BY CASE
-    WHEN UnitsInStock > 50 THEN 1
-    WHEN UnitsInStock > 0 THEN 2
-    ELSE 3
-END;
+-- Cursor örneği
+DECLARE @UserID INT;
+DECLARE @UserName NVARCHAR(50);
+
+DECLARE UserCursor CURSOR FOR
+SELECT UserID, UserName
+FROM Users;
+
+OPEN UserCursor;
+
+FETCH NEXT FROM UserCursor INTO @UserID, @UserName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    PRINT 'User ID: ' + CAST(@UserID AS NVARCHAR(10)) + ', User Name: ' + @UserName;
+
+    FETCH NEXT FROM UserCursor INTO @UserID, @UserName;
+END
+
+CLOSE UserCursor;
+DEALLOCATE UserCursor;
 GO
 
--- Saklı procedure (stored procedure) örneği
+-- Stored Procedure (saklı procedure) örneği
 CREATE PROCEDURE GetOrdersByUser
     @UserID INT
 AS
@@ -120,11 +133,11 @@ BEGIN
 END;
 GO
 
--- Saklı procedure'ı çağırma
+-- Stored Procedure'ı çağırma
 EXEC GetOrdersByUser 1;
 GO
 
--- Tablo değeri işlevi (table-valued function) örneği
+-- Table-Valued Function (tablo değeri işlevi) örneği
 CREATE FUNCTION GetProductsByPriceRange
     (@MinPrice DECIMAL(10,2),
      @MaxPrice DECIMAL(10,2))
@@ -142,17 +155,17 @@ RETURN (
 );
 GO
 
--- Tablo değeri işlevini kullanma
+-- Table-Valued Function'ı kullanma
 SELECT *
 FROM dbo.GetProductsByPriceRange(5.00, 15.00);
 GO
 
 -- Kısıtlamaları ekleme
 ALTER TABLE Users
-ADD CONSTRAINT CK_Users_Email CHECK (Email LIKE '%@%');
+ADD CONSTRAINT CK_Users_RegistrationDate CHECK (RegistrationDate <= GETDATE());
 
 ALTER TABLE Addresses
 ADD CONSTRAINT DF_Addresses_AddressLine2 DEFAULT '' FOR AddressLine2;
 
 ALTER TABLE Payments
-ADD CONSTRAINT CK_Payments_Amount CHECK (Amount > 0);
+ADD CONSTRAINT DF_Payments_PaymentStatus DEFAULT 'Pending' FOR PaymentStatus;
